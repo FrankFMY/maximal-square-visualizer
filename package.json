@@ -1,0 +1,38 @@
+{
+  "name": "maximal-square-visualizer",
+  "version": "1.0.0",
+  "description": "Interactive TypeScript visualizer for the optimal Maximal Square dynamic programming algorithm.",
+  "author": {
+    "name": "Artie Frank",
+    "url": "https://github.com/FrankFMY"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FrankFMY/maximal-square-visualizer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FrankFMY/maximal-square-visualizer/issues"
+  },
+  "homepage": "https://github.com/FrankFMY/maximal-square-visualizer#readme",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "tsc --noEmit",
+    "lint": "biome check --formatter-enabled=false src"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,136 +1,90 @@
 # Maximal Square Visualizer
 
-Интерактивный пошаговый симулятор алгоритма **Maximal Square** с оптимизацией памяти до `O(cols)`.
+Watch a memory-efficient dynamic programming algorithm work, one cell at a time. Edit a binary matrix, step through the TypeScript and see exactly how neighboring squares determine the next result.
 
-## Запуск
+[Русское руководство](README.ru.md)
 
-Понадобятся [Node.js](https://nodejs.org/) `20.19+` или `22.12+` и npm.
+## Run locally
+
+Use [Node.js](https://nodejs.org/) `^20.19.0` or `>=22.12.0`, with npm.
 
 ```bash
 git clone https://github.com/FrankFMY/maximal-square-visualizer.git
 cd maximal-square-visualizer
-npm install
+npm ci
 npm run dev
 ```
 
-После запуска откройте [http://localhost:5173](http://localhost:5173). Для остановки сервера нажмите `Ctrl+C`.
+Open [localhost:5173](http://localhost:5173). Press `Ctrl+C` to stop the server.
 
-В Windows также можно запустить `START_APP.bat` из папки клонированного проекта: скрипт установит зависимости при необходимости и откроет приложение в браузере.
+On Windows, you can also run `START_APP.bat` from the cloned project. It installs dependencies when needed and opens the app in your browser.
 
-## Что можно делать
+## Explore the algorithm
 
-- запускать и ставить алгоритм на паузу;
-- двигаться на один кадр назад и вперёд;
-- переходить сразу в начало или финал;
-- выбирать скорость `0.5×`, `1×`, `2×`, `4×`;
-- использовать клавиши `Space`, `←`, `→`, `Home`, `End`;
-- кликать по ячейкам матрицы и менять `0 ↔ 1`;
-- видеть исполняемую строку TypeScript;
-- следить за `r`, `c`, `temp`, `prev`, `top`, `left`, `diagonal`, `dp[c]`, `maxSide`;
-- видеть текущий квадрат и лучший найденный квадрат.
+- Play, pause, step backward/forward, or jump to the beginning and end.
+- Choose playback speeds of `0.5×`, `1×`, `2×` or `4×`.
+- Use `Space`, `←`, `→`, `Home` and `End` for keyboard control.
+- Click a matrix cell to toggle `0 ↔ 1`.
+- Follow the active TypeScript line and the values of `r`, `c`, `temp`, `prev`, `top`, `left`, `diagonal`, `dp[c]` and `maxSide`.
+- Compare the square at the current cell with the largest square found so far.
 
-## Главная идея алгоритма
+## How it works
 
-После обработки ячейки `[r][c]` значение:
+After processing `[r][c]`, `dp[c]` is the side length of the largest all-ones square whose bottom-right corner is that cell.
 
-```text
-dp[c]
-```
-
-означает сторону самого большого квадрата из единиц, который **заканчивается именно в `[r][c]`**.
-
-Если текущая ячейка равна `1`, размер квадрата определяется тремя соседями:
-
-```text
-top       = старое dp[c]
-left      = новое dp[c - 1]
-diagonal  = prev
-```
-
-Формула:
+For a cell containing `1`:
 
 ```ts
 dp[c] = Math.min(top, left, diagonal) + 1;
 ```
 
-Берётся минимум, потому что расширить квадрат можно только настолько, насколько позволяет самый маленький из трёх соседних квадратов.
+Here, `top` is the old `dp[c]`, `left` is the updated `dp[c - 1]`, and `diagonal` is `prev`. The smallest neighbor limits how far the square can grow.
 
-### Зачем нужен `temp`
-
-Перед вычислением мы сохраняем:
+Before overwriting `dp[c]`, the algorithm saves it:
 
 ```ts
 const temp = dp[c];
 ```
 
-`dp[c]` сейчас содержит `top`, но скоро будет перезаписан новым значением. Сохранённый `temp` станет диагональю для следующего столбца:
+After computing the new value, `prev = temp` preserves the diagonal for the next column. Each row starts with `prev = 0`.
 
-```ts
-prev = temp;
-```
+The algorithm takes `O(rows × cols)` time and `O(cols)` auxiliary space: one DP row and a diagonal value. Empty matrices, including matrices without columns, return `0`.
 
-### Почему память `O(cols)`
+The visualizer additionally stores immutable execution frames for rewind and explanations. That teaching layer uses extra memory; it is separate from the algorithm's `O(cols)` working space.
 
-Полная DP-таблица не нужна. Для текущей строки достаточно:
+## Verification
 
-- одной полоски `dp` шириной `cols`;
-- одной переменной `prev` для диагонали.
-
-Время остаётся `O(rows × cols)`, память — `O(cols)`. Это асимптотически оптимально по времени: в общем случае алгоритм обязан проверить каждую ячейку хотя бы один раз. Одномерная DP-полоска также исключает лишнюю таблицу `rows × cols`.
-
-Сам визуализатор дополнительно хранит неизменяемые кадры выполнения для перемотки и пояснений. Эта память относится только к учебному trace-слою и не требуется базовому алгоритму.
-
-## Обработка пустого входа
-
-Алгоритм сразу возвращает `0`, если матрица пуста или не содержит столбцов:
-
-```ts
-if (!matrix.length || !matrix[0]?.length) {
-  return 0;
-}
-```
-
-В визуализаторе `prev = 0` явно выполняется в начале каждой строки. Это делает инвариант диагонали очевидным и не зависит от специальной обработки первого столбца.
-
-## Проверки проекта
-
-```powershell
+```bash
 npm run lint
 npm test
 npm run check
 npm run build
 ```
 
-Проверяются:
+Tests cover the example result (`9`), the square growing at `[3][4]`, an independent brute-force oracle for every binary matrix up to `3×3`, ragged-input rejection, UI action allowlists, coordinate bounds, player transitions and playback timing.
 
-- правильный ответ `9` для исходной матрицы;
-- рост квадрата на `[3][4]` из `top=2`, `left=2`, `diagonal=2`;
-- совпадение с независимым полным перебором для всех `682` бинарных матриц размеров до `3×3`;
-- отклонение ломаной матрицы;
-- безопасный whitelist UI-действий и строгие границы координат;
-- границы переходов проигрывателя;
-- расчёт задержки для каждой скорости;
-- TypeScript и production build.
+The production build is written to `dist/`. Run `npm run preview` to inspect it locally.
 
-## Структура
+## Project map
 
-```text
-src/
-  example-matrix.ts  исходная матрица 6×7
-  trace.ts           алгоритм и генератор неизменяемых кадров
-  trace.test.ts      тесты алгоритма
-  interaction.ts     безопасный dispatch и проверка координат
-  interaction.test.ts тесты hostile UI-входов
-  player.ts          переходы и скорость проигрывателя
-  player.test.ts     тесты проигрывателя
-  main.ts            интерфейс и взаимодействия
-  styles.css         адаптивный визуальный слой
-```
+| File | Purpose |
+| --- | --- |
+| `src/example-matrix.ts` | Initial `6×7` matrix |
+| `src/trace.ts` | Algorithm and immutable execution frames |
+| `src/interaction.ts` | UI dispatch and coordinate validation |
+| `src/player.ts` | Playback transitions and timing |
+| `src/main.ts` | Interface and interactions |
+| `src/styles.css` | Responsive presentation |
+| `src/*.test.ts` | Algorithm, interaction and player tests |
 
-## Автор
+## Author and contact
 
-[Artie Frank (@FrankFMY)](https://github.com/FrankFMY)
+**Artem Prianishnikov** · [FrankFMY](https://github.com/FrankFMY)
 
-## Лицензия
+[Website](https://frankfmy.com) · [Telegram](https://t.me/FrankFMY) · [LinkedIn](https://www.linkedin.com/in/frankfmy/) · [X](https://x.com/FrankFMY) · [npm profile](https://www.npmjs.com/~frankfmy)
 
-Проект распространяется по лицензии [MIT](LICENSE).
+Email: [frankfmy@proton.me](mailto:frankfmy@proton.me) · [Pryanishnikovartem@gmail.com](mailto:Pryanishnikovartem@gmail.com)
+
+## License
+
+[MIT](LICENSE). The original copyright notice is preserved under the author's earlier public name, Artie Frank.

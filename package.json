@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Interactive TypeScript visualizer for the optimal Maximal Square dynamic programming algorithm.",
   "author": {
-    "name": "Artie Frank",
-    "url": "https://github.com/FrankFMY"
+    "name": "Artem Prianishnikov",
+    "email": "Pryanishnikovartem@gmail.com",
+    "url": "https://frankfmy.com"
   },
   "license": "MIT",
   "repository": {
